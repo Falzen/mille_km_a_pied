@@ -135,15 +135,32 @@ body {
 
     min-height:  130px;
     background-color: lightgreen;
+
+}
+.kilometers > div {
+    position: relative;
+}
+
+.kilometers .card-shape > div.card {
+    margin-bottom: -180px;
 }
 
 
 .story .card,
-.kilometers .card {
+.kilometers.card {
     zoom:  0.8;
 }
 
-
+.overcard {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    opacity: 0.1;
+    z-index: 100;
+}
 
 
 
@@ -159,9 +176,20 @@ body {
     justify-content: center;
     /*background-color: lightpink;*/
     min-height:  160px;
+    transition: all 0.2s ease;
+}
+#p1-hand {
+    transform: translateY(90px);
+}
+#p2-hand {
+    transform: translateY(-90px);
 }
 
-.card {
+#p1-hand:hover {
+   transform: translateY(0px) !important;
+}
+
+.card, .card-shape {
     width:  146px;
     height:  200px;
     margin:  2px 3px;
@@ -169,6 +197,9 @@ body {
     /*background-color: grey;*/
     /*border:  2px solid black;*/
     border-radius: 10px;
+}
+
+.card {
     overflow: hidden;
 }
 
@@ -190,6 +221,49 @@ body {
 .card.is-rotated img {
     transform:  rotateZ(180deg);
 }
+
+
+
+
+
+
+#p1-200::before {
+    content: "200";
+    position: absolute;
+    left: 0;
+    top: -25px;
+}
+#p1-100::before {
+    content: "100";
+    position: absolute;
+    left: 0;
+    top: -25px;
+}
+#p1-75::before {
+    content: "75";
+    position: absolute;
+    left: 0;
+    top: -25px;
+}
+#p1-50::before {
+    content: "50";
+    position: absolute;
+    left: 0;
+    top: -25px;
+}
+#p1-25::before {
+    content: "25";
+    position: absolute;
+    left: 0;
+    top: -25px;
+}
+
+
+
+
+
+
+
 
 
 

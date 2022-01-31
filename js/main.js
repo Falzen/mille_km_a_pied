@@ -60,18 +60,8 @@ let cardsData = [
         qte: 6,
         type: 'nolimit'
     },
-    {
-        name: 'fifty',
-        src: 'img/fifty.png',
-        qte: 10,
-        type: 'km'
-    },
-    {
-        name: 'hundred',
-        src: 'img/hundred.png',
-        qte: 12,
-        type: 'km'
-    },
+
+
     {
         name: 'limite_vitesse',
         src: 'img/limite_vitesse.png',
@@ -103,23 +93,43 @@ let cardsData = [
         type: 'special'
     },
     {
+        name: 'fifty',
+        dist: 50,
+        src: 'img/fifty.png',
+        qte: 10,
+        type: 'km'
+    },
+    {
+        name: 'hundred',
+        dist: 100,
+        src: 'img/hundred.png',
+        qte: 12,
+        type: 'km'
+    },
+    {
         name: 'seventy_five',
+        dist: 75,
         src: 'img/seventy_five.png',
         qte: 10,
         type: 'km'
     },
     {
         name: 'two_hundred',
+        dist: 200,
         src: 'img/two_hundred.png',
         qte: 4,
         type: 'km'
     },
     {
         name: 'twenty_five',
+        dist: 25,
         src: 'img/twenty_five.png',
         qte: 10,
         type: 'km'
     }
+
+
+
 ];
 
 var p1 = {
@@ -179,6 +189,7 @@ class Card {
 		this.name = data.name;
 		this.src = data.name;
 		this.type = data.type;
+		this.dist = data.dist;
 	}
 }
 
@@ -207,17 +218,24 @@ function refreshHand(player) {
 	let handDom = '';
 	for (var i = 0; i < player.hand.length; i++) {
 		let oneCard = player.hand[i];
-		handDom += createCardDom(oneCard);
+		handDom += createCardDom(oneCard, player);
 	}
 	$(player.domElements.hand).html(handDom);
 }
 
 // todo mieux avec https://jerome-malenfant.com/more/turnableCardsEffect/
-function createCardDom(cardData) {
-	let output = 	'<div class="card" data-cname="' + cardData.src + '" data-ctype="' + cardData.type + '">'
-						// + '<span class="rotateCard" onclick="rotateCard(this)"></span>'
-						+ '<img src="img/' + cardData.src + '.png" alt="' + cardData.name + '" />'
-					+'</div>';
+function createCardDom(cardData, player) {
+	let output = 	'<div class="card"';
+		output += ' data-pnickname="' + player.nickname + '"';
+		output += ' data-cname="' + cardData.src + '"';
+		output += ' data-ctype="' + cardData.type + '"';
+		if(cardData.type == 'km') {
+			output += ' data-dist="' + cardData.dist + '"';
+		}
+	output += '>';
+		// + '<span class="rotateCard" onclick="rotateCard(this)"></span>'
+		output += '<img src="img/' + cardData.src + '.png" alt="' + cardData.name + '" />'
+	output += '</div>';
 	return output;
 }
 
@@ -238,6 +256,7 @@ function rotateCard(el) {
 
 var deck = null;
 var whoseTurn = null;
+var currentCardDom = null;
 
 $(document).ready(function() {
 	whoseTurn = p1;
@@ -248,41 +267,57 @@ $(document).ready(function() {
 
 function init() {
 	deck = createDeck();
-	console.log('deck.length : ', deck.length );
-	drawCard(p1.hand);
-	drawCard(p1.hand);
-	drawCard(p1.hand);
-	drawCard(p1.hand);
-	drawCard(p1.hand);
-	console.log('p1.hand', p1.hand);
-	console.log('deck.length : ', deck.length );
-
-	drawCard(p2.hand);
-	drawCard(p2.hand);
-	drawCard(p2.hand);
-	drawCard(p2.hand);
-	drawCard(p2.hand);
-	console.log('p2.hand', p2.hand);
-	console.log('deck.length : ', deck.length );
+	drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand);
+	drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand);
 
 	refreshHand(p1);
 	refreshHand(p2);
 
-	setEventListeners()
+	setEventListeners();
 }
 
 function setEventListeners() {
-	$('body').on('click', '.card', function(ev) {
+	$('body').on('click', '.distance', function(ev) {
+		console.log(ev.currentTarget);
+	 })
+	.on('click', '.hand .card', function(ev) {
 		unhighlightAll();
 		selectCard($(ev.target).parent('.card'));
+	})
+	.on('click', '.distance', function(ev) {
+		console.log('click kilometers ev : ', ev);
+		if(currentCardDom == null || currentCardDom.dataset.ctype != 'km') { 
+			unhighlightAll();
+			$('.card').removeClass('is-selected');
+			return; 
+		}
+		let clickedDistance = ev.target.dataset.distvalue;
+		console.log('clickedDistance : ', clickedDistance);
+		console.log('currentCardDom.dataset.dist : ', currentCardDom.dataset.dist);
+		if(clickedDistance != currentCardDom.dataset.dist) {
+			unhighlightAll();
+			$('.card').removeClass('is-selected');
+			return;
+		}
+
+		addDistance(ev.target)
+		//selectCard($(ev.target).parent('.card'));
 	});
+}
+
+function addDistance(target) {
+	$(target).parent('.card-shape').append(currentCardDom);
+	$('.card').removeClass('is-selected');
+
+	currentCardDom = null;
 }
 
 function selectCard(el) {
 	if(el.length == 0) {
 		return;
 	}
-	el = el[0];
+	currentCardDom = el = el[0];
+	console.log('currentCardDom : ', currentCardDom);
 	if(!$(el).hasClass('is-selected')) {
 		$('.card').removeClass('is-selected');
 		$(el).addClass('is-selected');
