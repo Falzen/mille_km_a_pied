@@ -109,7 +109,11 @@ body {
     justify-content: space-between;
 }
 
-
+.flex-container {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
 
 
 .player-side {
@@ -119,19 +123,23 @@ body {
     margin:  0 auto;
 }
 .story {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
 
     min-height:  130px;
     margin-right: 6px;
     background-color: lightblue;
 }
 
+
+#p1-distance {
+    margin:  0;
+    background-color: pink;
+}
+
 .kilometers {
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
+    position: relative;
 
     min-height:  130px;
     background-color: lightgreen;
@@ -141,15 +149,27 @@ body {
     position: relative;
 }
 
-.kilometers .card-shape > div.card {
+.card-shape > div.card {
     margin-bottom: -180px;
 }
 
 
 .story .card,
 .kilometers.card {
-    zoom:  0.8;
+    zoom:  0.92;
 }
+
+
+.main-stack,
+.trafficlight,
+.specials {
+    position: relative;
+}
+
+
+
+
+
 
 .overcard {
     position: absolute;
@@ -157,11 +177,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
+    background-color: pink;
     opacity: 0.1;
     z-index: 100;
 }
-
 
 
 
@@ -176,18 +195,13 @@ body {
     justify-content: center;
     /*background-color: lightpink;*/
     min-height:  160px;
-    transition: all 0.2s ease;
 }
 #p1-hand {
-    transform: translateY(90px);
 }
 #p2-hand {
-    transform: translateY(-90px);
+    display: none;
 }
 
-#p1-hand:hover {
-   transform: translateY(0px) !important;
-}
 
 .card, .card-shape {
     width:  146px;
@@ -197,6 +211,13 @@ body {
     /*background-color: grey;*/
     /*border:  2px solid black;*/
     border-radius: 10px;
+    transition: all 0.2s ease;
+}
+#p1-hand .card:hover {
+    transform: translateY(-30px);
+}
+#p2-hand .card:hover {
+   transform: translateY(30px) !important;
 }
 
 .card {
@@ -283,8 +304,35 @@ body {
     height:  180px;
     background-color: green;
     align-self: center;
+    margin-right: 8px;
+    background-image: url(../img/pioche.png);
+    background-size: contain;
+    background-position-y: center;
+    background-repeat: no-repeat;
+    
 
 }
+#discard-content {
+    width:  130px;
+    height:  180px;
+    background-color: orange;
+    align-self: center;
+    position: relative;
+
+}
+#discard-content > div {
+    zoom:  0.95;
+    position: absolute;
+    top:  3px;
+    left:  3px;
+}
+#discard-content > div:nth-child(even) {
+    transform:  rotateZ(2deg);
+}
+#discard-content > div:nth-child(odd) {
+    transform:  rotateZ(-3deg);
+}
+
 
 
 

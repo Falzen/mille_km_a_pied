@@ -183,9 +183,11 @@ var p2 = {
 		has_increvable: false
 	}
 }
-
+var cardIdCpt = 0;
 class Card {
+
     constructor(data) {
+    	this.id = ++cardIdCpt;
 		this.name = data.name;
 		this.src = data.name;
 		this.type = data.type;
@@ -208,9 +210,10 @@ function createDeck() {
 }
 
 
-function drawCard(hand) {
+function drawCard(player) {
 	let drawnCard = deck.pop();
-	hand.push(drawnCard);
+	player.hand.push(drawnCard);
+	refreshHand(player);
 }
 
 
@@ -225,7 +228,7 @@ function refreshHand(player) {
 
 // todo mieux avec https://jerome-malenfant.com/more/turnableCardsEffect/
 function createCardDom(cardData, player) {
-	let output = 	'<div class="card"';
+	let output = 	'<div class="card" id="' + cardData.id + '"';
 		output += ' data-pnickname="' + player.nickname + '"';
 		output += ' data-cname="' + cardData.src + '"';
 		output += ' data-ctype="' + cardData.type + '"';
@@ -267,8 +270,8 @@ $(document).ready(function() {
 
 function init() {
 	deck = createDeck();
-	drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand); drawCard(p1.hand);
-	drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand); drawCard(p2.hand);
+	drawCard(p1); drawCard(p1); drawCard(p1); drawCard(p1); drawCard(p1);
+	drawCard(p2); drawCard(p2); drawCard(p2); drawCard(p2); drawCard(p2);
 
 	refreshHand(p1);
 	refreshHand(p2);
@@ -278,37 +281,131 @@ function init() {
 
 function setEventListeners() {
 	$('body').on('click', '.distance', function(ev) {
-		console.log(ev.currentTarget);
 	 })
 	.on('click', '.hand .card', function(ev) {
 		unhighlightAll();
 		selectCard($(ev.target).parent('.card'));
 	})
-	.on('click', '.distance', function(ev) {
-		console.log('click kilometers ev : ', ev);
+	.on('click', '.distance-drop', function(ev) {
+		// not a km card
 		if(currentCardDom == null || currentCardDom.dataset.ctype != 'km') { 
 			unhighlightAll();
 			$('.card').removeClass('is-selected');
 			return; 
 		}
 		let clickedDistance = ev.target.dataset.distvalue;
-		console.log('clickedDistance : ', clickedDistance);
-		console.log('currentCardDom.dataset.dist : ', currentCardDom.dataset.dist);
+		// wrong km clicked
+		// TODO si speed limit en cours alors must be <= 50
 		if(clickedDistance != currentCardDom.dataset.dist) {
 			unhighlightAll();
 			$('.card').removeClass('is-selected');
 			return;
 		}
 
-		addDistance(ev.target)
-		//selectCard($(ev.target).parent('.card'));
+		addDistance(ev.target);
+	})
+	.on('click', '.trafficlight-drop', function(ev) {
+		// TODO si feu rouge en cours alors must be feu vert
+		// si limit vitesse alors must be fin limit
+		if(
+			currentCardDom != null 
+			&& currentCardDom.dataset.ctype == 'save'
+			&& currentCardDom.dataset.cname == 'feux_vert'
+		) {
+			addToOwnStack(ev.target);
+			//addToTrafficlight(ev.target);
+		} else {
+			unhighlightAll();
+			$('.card').removeClass('is-selected');
+			return; 
+		}
+	})
+	.on('click', '.specials-drop', function(ev) {
+		if(
+			currentCardDom != null 
+			&& currentCardDom.dataset.ctype == 'special'
+		) {
+			// TODO si accident qui correspond au special en cours, bonus points
+			addToOwnStack(ev.target);
+			//addToSpecials(ev.target);	
+		}
+		else {
+			unhighlightAll();
+			$('.card').removeClass('is-selected');
+			return; 
+		}
+		
+	})
+	.on('click', '.main-stack-drop', function(ev) {
+		// TODO si accident correspondant en cours seulement
+		if(
+			currentCardDom != null 
+			&& currentCardDom.dataset.ctype == 'save'
+		) {
+			addToOwnStack(ev.target);
+			//addToMainStack(ev.target);
+		} else {
+			unhighlightAll();
+			$('.card').removeClass('is-selected');
+			return; 
+		}
+		
+	})
+	.on('click', '#pioche-content', function(ev) {
+		drawCard(p1);
+	})
+	.on('click', '#discard-content', function(ev) {
+		discardSelectedCard();
+		
 	});
+	
+	
 }
 
-function addDistance(target) {
+function discardSelectedCard() {
+	$('#discard-content').append(currentCardDom);
+	p1.hand = p1.hand.filter(function (el) {
+		return el.id != currentCardDom.id
+	});
+	refreshHand(p1);
+}
+
+
+function addToOwnStack(target) {
+	$(target).parent('.card-shape').append(currentCardDom);
+	p1.hand = p1.hand.filter(function (el) {
+		return el.id != currentCardDom.id
+	});
+
+	$('.card').removeClass('is-selected');
+	currentCardDom = null;
+}
+/*
+function addToTrafficlight(target) {
 	$(target).parent('.card-shape').append(currentCardDom);
 	$('.card').removeClass('is-selected');
-
+	currentCardDom = null;
+}
+function addToSpecials(target) {
+	$(target).parent('.card-shape').append(currentCardDom);
+	$('.card').removeClass('is-selected');
+	currentCardDom = null;
+}
+function addToMainStack(target) {
+	$(target).parent('.card-shape').append(currentCardDom);
+	$('.card').removeClass('is-selected');
+	currentCardDom = null;
+}
+*/
+function addDistance(target) {
+	let value = 1*(currentCardDom.dataset.dist);
+	$(target).parent('.card-shape').append(currentCardDom);
+	p1.hand = p1.hand.filter(function (el) {
+		return el.id != currentCardDom.id
+	});
+	$('.card').removeClass('is-selected');
+	p1.distance += value;
+	$('#p1-distance').text(p1.distance);
 	currentCardDom = null;
 }
 
@@ -317,7 +414,6 @@ function selectCard(el) {
 		return;
 	}
 	currentCardDom = el = el[0];
-	console.log('currentCardDom : ', currentCardDom);
 	if(!$(el).hasClass('is-selected')) {
 		$('.card').removeClass('is-selected');
 		$(el).addClass('is-selected');
@@ -342,8 +438,6 @@ type:
 function highlightPossibleDrops(el) {
 	let type = el.dataset.ctype;
 	switch(type) {
-		case 'back':
-		break;
 
 		case 'limit':
 		break;
@@ -362,16 +456,33 @@ function highlightPossibleDrops(el) {
 		break;
 
 		case 'save':
+			if(el.dataset.cname == 'feux_vert') {
+				highlightTrafficlight()	
+			}
 		break;
-
+	}
+	if(p1.hand.length >= 6) {
+		highlightDiscard()
 	}
 }
 
+function highlightDiscard() {
+	$('#discard-content').addClass('is-possible-drop');
+}
+
+function highlightTrafficlight() {
+	$('#discard-content').addClass('is-possible-drop');
+	$('.player-side *').removeClass('is-possible-drop');
+	$('#' + whoseTurn.nickname + '-story .trafficlight').addClass('is-possible-drop');
+}
+
 function unhighlightAll() {
+	$('#discard-content').addClass('is-possible-drop');
 	$('.player-side *').removeClass('is-possible-drop');
 }
 
 function highlightDistance(name) {
+	$('#discard-content').addClass('is-possible-drop');
 	$('.player-side *').removeClass('is-possible-drop');
 	$('#' + whoseTurn.nickname + '-kilometers .' + name + ':not(.is-full)').addClass('is-possible-drop');
 }
